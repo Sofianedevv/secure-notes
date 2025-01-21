@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Notes</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="container">
+        <h1>Mes Notes</h1>
+        <a href="/notes/create" class="button action-button create-note-button" title="Créer une nouvelle note">
+            <i class="fas fa-plus"></i>
+        </a>
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="Rechercher dans les notes..." 
+                class="search-input"
+            >
+        </div>
+        <div class="sort-container">
+            <select id="sortSelect" class="sort-select">
+                <option value="date">Trier par date</option>
+                <option value="title">Trier par titre</option>
+            </select>
+        </div>
+        <div class="notes-list">
+            <% if (notes && notes.length > 0) { %>
+                <% notes.forEach(note => { %>
+                    <div class="note-card" data-note-id="<%= note.id %>" data-date="<%= note.updatedAt %>">
+                        <h3><%= helpers.escapeHtml(note.title) %></h3>
+                        <p><%- helpers.sanitize(note.content) %></p>
+                        
+                        <div class="note-tags">
+                            <% if (note.tags && Array.isArray(note.tags)) { %>
+                                <% note.tags.forEach(tag => { %>
+                                    <span class="tag">
+                                        <%= tag %>
+                                        <button class="tag-remove" onclick="removeTag('<%= note.id %>', '<%= tag %>')">&times;</button>
+                                    </span>
+                                <% }) %>
+                            <% } %>
+                            <button class="add-tag-btn" onclick="showAddTagModal('<%= note.id %>')">+</button>
+                        </div>
+
+                        <div class="note-actions">
+                            <a href="/notes/edit/<%= note.id %>" class="button action-button edit">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button onclick="deleteNote('<%= note.id %>')" class="button delete">
+                                <i class="fas fa-trash"></i>
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Aucune note pour le moment</p>
+            <% } %>
+        </div>
+    </div>
+
+    <div id="addTagModal" class="modal">
+        <div class="modal-content">
+            <h2>Ajouter un tag</h2>
+            <form id="addTagForm">
+                <div class="form-group">
+                    <input type="text" id="tagInput" placeholder="Entrez un tag" required>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="button">Ajouter</button>
+                    <button type="button" onclick="closeAddTagModal()" class="button">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/apiService.js"></script>
+    <script src="/js/notificationService.js"></script>
+    <script src="/js/searchService.js"></script>
+    <script src="/js/sortService.js"></script>
+    <script src="/js/tagService.js"></script>
+
+    <script>
+    async function deleteNote(noteId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
+            return;
+        }
+
+        try {
+            await ApiService.deleteNote(noteId);
+            NotificationService.success('Note supprimée avec succès');
+            
+            const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+            if (noteElement) {
+                noteElement.remove();
+            }
+
+            const notesList = document.querySelector('.notes-list');
+            if (!notesList.querySelector('.note-card')) {
+                notesList.innerHTML = '<p>Aucune note pour le moment</p>';
+            }
+        } catch (error) {
+            NotificationService.error(error.message);
+        }
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+        SearchService.searchNotes(e.target.value);
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+        SortService.sortNotes(e.target.value);
+    });
+
+    let currentNoteId = null;
+
+    function showAddTagModal(noteId) {
+        currentNoteId = noteId;
+        document.getElementById('addTagModal').classList.add('show');
+        document.getElementById('tagInput').focus();
+    }
+
+    function closeAddTagModal() {
+        document.getElementById('addTagModal').classList.remove('show');
+        document.getElementById('tagInput').value = '';
+        currentNoteId = null;
+    }
+
+    document.getElementById('addTagForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const tagInput = document.getElementById('tagInput');
+        const tagName = tagInput.value.trim();
+        
+        try {
+            await TagService.addTag(currentNoteId, tagName);
+            
+            const noteCard = document.querySelector(`[data-note-id="${currentNoteId}"]`);
+            const tagsContainer = noteCard.querySelector('.note-tags');
+            const tagElement = TagService.createTagElement(tagName, currentNoteId);
+            tagsContainer.insertBefore(tagElement, tagsContainer.lastElementChild);
+            
+            NotificationService.success('Tag ajouté');
+            closeAddTagModal();
+        } catch (error) {
+            NotificationService.error('Erreur lors de l\'ajout du tag');
+        }
+    });
+
+    async function removeTag(noteId, tagName) {
+        if (!confirm('Voulez-vous vraiment supprimer ce tag ?')) return;
+        
+        try {
+            await TagService.removeTag(noteId, tagName);
+            NotificationService.success('Tag supprimé');
+        } catch (error) {
+            NotificationService.error('Erreur lors de la suppression du tag');
+        }
+    }
+
+    document.querySelectorAll('.note-card').forEach(note => {
+        note.draggable = true;
+        note.addEventListener('dragstart', e => {
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('noteId', e.target.dataset.noteId);
+        });
+        note.addEventListener('dragend', e => {
+            e.target.classList.remove('dragging');
+        });
+    });
+
+    document.querySelectorAll('.folder').forEach(folder => {
+        folder.addEventListener('dragover', e => {
+            e.preventDefault();
+            folder.classList.add('drag-over');
+        });
+        folder.addEventListener('dragleave', e => {
+            folder.classList.remove('drag-over');
+        });
+        folder.addEventListener('drop', async e => {
+            e.preventDefault();
+            const noteId = e.dataTransfer.getData('noteId');
+            const folderId = folder.dataset.folderId;
+            try {
+                await FolderService.moveNote(noteId, folderId);
+                NotificationService.success('Note déplacée avec succès');
+            } catch (error) {
+                NotificationService.error('Erreur lors du déplacement');
+            }
+            folder.classList.remove('drag-over');
+        });
+    });
+    </script>
+</body>
+</html> 

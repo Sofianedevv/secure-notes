@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier la Note</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="container">
+        <h1>Modifier la Note</h1>
+        <form id="editNoteForm">
+            <div class="form-group">
+                <label for="title">Titre</label>
+                <input type="text" id="title" name="title" value="<%= helpers.escapeHtml(note.title) %>" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Contenu</label>
+                <textarea id="content" name="content" rows="10" required><%= helpers.escapeHtml(note.content) %></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="button">Enregistrer</button>
+                <a href="/notes" class="button">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="/js/apiService.js"></script>
+    <script src="/js/notificationService.js"></script>
+
+    <script>
+    document.getElementById('editNoteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const noteData = {
+                title: document.getElementById('title').value,
+                content: document.getElementById('content').value
+            };
+
+            await ApiService.updateNote('<%= note.id %>', noteData);
+            NotificationService.success('Note modifiée avec succès');
+            window.location.href = '/notes';
+        } catch (error) {
+            NotificationService.error(error.message);
+        }
+    });
+    </script>
+</body>
+</html> 

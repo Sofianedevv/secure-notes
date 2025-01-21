@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/authCheck.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Connexion</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Se connecter</button>
+        </form>
+        <p>Pas encore de compte? <a href="/auth/register">S'inscrire</a></p>
+        <div id="error-message" style="color: red; margin-top: 10px;"></div>
+    </div>
+
+    <script src="/js/apiService.js"></script>
+    <script src="/js/notificationService.js"></script>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const credentials = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
+
+                const response = await ApiService.login(credentials);
+                NotificationService.success('Connexion réussie');
+                window.location.href = response.redirect;
+            } catch (error) {
+                NotificationService.error(error.message);
+            }
+        });
+    </script>
+</body>
+</html> 

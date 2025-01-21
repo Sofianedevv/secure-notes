@@ -1,0 +1,71 @@
+<header class="main-header">
+    <nav>
+        <div class="nav-brand">
+            <a href="/">
+                <i class="fas fa-shield-alt"></i>
+                SecureNotes
+            </a>
+        </div>
+        <div class="nav-links">
+            <% if (locals.user) { %>
+                <span class="user-email"><%= user.email %></span>
+                <% if (user.role === 'professor') { %>
+                    <a href="/notes/all" class="button all-notes">
+                        <i class="fas fa-book"></i>
+                        Toutes les Notes
+                    </a>
+                <% } %>
+                <button onclick="PreferencesService.openModal()" class="button">Thèmes</button>
+                <button onclick="logout()" class="button logout">Déconnexion</button>
+            <% } %>
+        </div>
+    </nav>
+</header>
+
+<div id="preferencesModal" class="modal">
+    <div class="modal-content">
+        <h2>Préférences</h2>
+        <form id="preferencesForm">
+            <div class="form-group">
+                <label for="theme">Thème</label>
+                <select id="theme" name="theme">
+                    <option value="light">Clair</option>
+                    <option value="dark">Sombre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fontSize">Taille du texte</label>
+                <select id="fontSize" name="fontSize">
+                    <option value="small">Petit</option>
+                    <option value="normal">Normal</option>
+                    <option value="large">Grand</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="autoSave" name="autoSave">
+                    Auto-sauvegarde
+                </label>
+            </div>
+            <div class="actions">
+                <button type="submit" class="button">Sauvegarder</button>
+                <button type="button" data-close-modal class="button">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/storageService.js"></script>
+<script src="/js/preferencesService.js"></script>
+<script>
+    PreferencesService.init();
+
+    async function logout() {
+        try {
+            await ApiService.logout();
+            window.location.href = '/';
+        } catch (error) {
+            NotificationService.error('Erreur lors de la déconnexion');
+        }
+    }
+</script> 

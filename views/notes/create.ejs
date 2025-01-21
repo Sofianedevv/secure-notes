@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer une Note</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="container">
+        <h1>Créer une Note</h1>
+        <form id="createNoteForm">
+            <div class="form-group">
+                <label for="title">Titre</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Contenu</label>
+                <textarea id="content" name="content" rows="10" required></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="button">Créer</button>
+                <a href="/notes" class="button">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="/js/apiService.js"></script>
+    <script src="/js/notificationService.js"></script>
+    <script src="/js/storageService.js"></script>
+
+    <script>
+    const form = document.getElementById('createNoteForm');
+    const titleInput = document.getElementById('title');
+    const contentInput = document.getElementById('content');
+
+    window.addEventListener('load', () => {
+        const draft = StorageService.getDraftNote();
+        if (draft) {
+            if (confirm('Un brouillon a été trouvé. Voulez-vous le restaurer ?')) {
+                titleInput.value = draft.title || '';
+                contentInput.value = draft.content || '';
+            } else {
+                StorageService.clearDraftNote();
+            }
+        }
+    });
+
+    let autoSaveInterval = setInterval(() => {
+        if (titleInput.value || contentInput.value) {
+            StorageService.saveDraftNote({
+                title: titleInput.value,
+                content: contentInput.value
+            });
+            NotificationService.info('Brouillon sauvegardé');
+        }
+    }, 30000);
+
+    window.addEventListener('beforeunload', () => {
+        clearInterval(autoSaveInterval);
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const noteData = {
+                title: titleInput.value,
+                content: contentInput.value
+            };
+
+            await ApiService.createNote(noteData);
+            StorageService.clearDraftNote(); 
+            NotificationService.success('Note créée avec succès');
+            window.location.href = '/notes';
+        } catch (error) {
+            NotificationService.error(error.message);
+        }
+    });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="container error-container">
+        <h1><%= error || 'Erreur' %></h1>
+        <% if (locals.isDevelopment) { %>
+            <pre class="error-details"><%= message %></pre>
+        <% } else { %>
+            <p><%= locals.message || "Une erreur s'est produite" %></p>
+        <% } %>
+        <a href="/" class="button">Retour à l'accueil</a>
+    </div>
+
+    <style>
+        .error-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</body>
+</html> 

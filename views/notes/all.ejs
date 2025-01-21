@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toutes les Notes</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="container">
+        <h1>Toutes les Notes</h1>
+        <div class="notes-list">
+            <% if (notes && notes.length > 0) { %>
+                <% notes.forEach(note => { %>
+                    <div class="note-card">
+                        <div class="note-header">
+                            <h3><%= note.title %></h3>
+                            <span class="note-author">Par: <%= note.User.email %></span>
+                        </div>
+                        <p><%= note.content %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Aucune note disponible</p>
+            <% } %>
+        </div>
+        <a href="/notes" class="button">Retour à mes notes</a>
+    </div>
+</body>
+</html> 
