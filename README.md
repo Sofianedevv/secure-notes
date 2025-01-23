@@ -4,12 +4,12 @@ Une application web de gestion de notes sécurisée construite avec Node.js et E
 
 ## 🚀 Caractéristiques
 
-- Authentification JWT sécurisée
-- Interface utilisateur moderne et responsive
+- Authentification JWT sécurisée et session
 - Système de rôles (étudiants/professeurs)
 - Gestion des notes avec tags et recherche
 - Protection contre les attaques XSS et CSRF
 - Sauvegarde automatique des brouillons
+- support CORS
 
 ## 🛠️ Technologies
 
@@ -95,6 +95,7 @@ secure-notes-platform/
 - Cookies HttpOnly
 - Protection XSS
 - HTTPS
+- CORS
 
 ## Technologies utilisées
 - Backend : Node.js, Express
