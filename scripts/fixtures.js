@@ -23,36 +23,36 @@ const users = [
     }
 ];
 
-const notes = [
+const createNotes = (userIds) => [
     {
         title: 'Introduction à JavaScript',
         content: 'JavaScript est un langage de programmation qui permet d\'ajouter de l\'interactivité aux pages web. Voici les concepts de base :\n\n1. Variables et types de données\n2. Fonctions et portée\n3. Objets et tableaux\n4. Événements et DOM',
         tags: ['javascript', 'web', 'cours'],
-        userId: 1
+        userId: userIds[0] // professeur
     },
     {
         title: 'Les bases de Node.js',
         content: 'Node.js est un environnement d\'exécution JavaScript côté serveur. Points importants :\n\n- Installation et configuration\n- NPM et gestion des packages\n- Création d\'un serveur HTTP\n- Gestion des fichiers',
         tags: ['nodejs', 'backend', 'javascript'],
-        userId: 1
+        userId: userIds[0] // professeur
     },
     {
         title: 'Sécurité Web',
         content: 'Les bonnes pratiques de sécurité pour le développement web :\n\n1. Protection contre les injections SQL\n2. Prévention des attaques XSS\n3. Gestion sécurisée des sessions\n4. HTTPS et certificats SSL',
         tags: ['securite', 'web', 'important'],
-        userId: 2
+        userId: userIds[1] // etudiant1
     },
     {
         title: 'Mes notes de cours',
         content: 'À faire :\n- Réviser JavaScript\n- Préparer le projet Node.js\n- Questions sur la sécurité\n- Exercices sur Express',
         tags: ['todo', 'cours', 'personnel'],
-        userId: 2
+        userId: userIds[1] // etudiant1
     },
     {
         title: 'Projet final - Idées',
         content: 'Idées pour le projet final :\n\n1. Application de gestion de notes sécurisée\n2. Système de chat en temps réel\n3. API REST avec authentification\n4. Dashboard d\'analytics',
         tags: ['projet', 'idees', 'important'],
-        userId: 3
+        userId: userIds[2] // etudiant2
     }
 ];
 
@@ -79,6 +79,7 @@ async function loadFixtures() {
         }
 
         console.log('Création des notes...');
+        const notes = createNotes(createdUsers.map(user => user.id));
         const createdNotes = await Note.bulkCreate(notes);
         console.log(`${createdNotes.length} notes créées`);
 
@@ -99,8 +100,4 @@ async function loadFixtures() {
     }
 }
 
-if (require.main === module) {
-    loadFixtures();
-}
-
-module.exports = loadFixtures; 
+loadFixtures(); 

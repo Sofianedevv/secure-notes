@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const corsMiddleware = require('./middleware/cors');
 const path = require('path');
 const sequelize = require('./config/database');
 const auth = require('./middleware/auth');
@@ -19,6 +20,20 @@ const httpsOptions = {
     key: fs.readFileSync(path.join(__dirname, 'ssl', 'key.pem')),
     cert: fs.readFileSync(path.join(__dirname, 'ssl', 'cert.pem'))
 };
+
+// Configuration CORS sécurisée
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://votredomaine.com']  // Domaines autorisés en production
+        : ['https://localhost:3000'],     // Domaine local pour le développement
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,  // Permet l'envoi de cookies
+    maxAge: 86400,     // Cache preflight pour 24h
+    optionsSuccessStatus: 200
+};
+
+app.use(corsMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

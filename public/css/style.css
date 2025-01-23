@@ -739,4 +739,19 @@ input[type="checkbox"] {
 
 .note-actions .button.edit:hover {
     background: #45a049;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1.2em;
+    display: inline-block;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    color: white;
 } 
