@@ -91,10 +91,13 @@ router.post('/login', [
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                maxAge: 24 * 60 * 60 * 1000, 
-                sameSite: 'strict',          
-                path: '/',                   
-                domain: process.env.NODE_ENV === 'production' ? 'votredomaine.com' : 'localhost'
+                maxAge: 24 * 60 * 60 * 1000,
+                sameSite: 'strict',
+                path: '/',
+                domain: process.env.NODE_ENV === 'production' ? 'votredomaine.com' : 'localhost',
+                signed: true,
+                expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                encode: String
             });
 
             res.json({ success: true, redirect: '/notes' });

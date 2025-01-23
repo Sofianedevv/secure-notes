@@ -2,9 +2,14 @@ const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
     try {
-        const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.signedCookies.token || req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
             if (req.xhr || req.path.startsWith('/api/') || req.get('accept')?.includes('application/json')) {
                 return res.status(401).json({ message: 'Non authentifié' });
             }
